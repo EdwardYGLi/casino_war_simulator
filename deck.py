@@ -53,8 +53,7 @@ class WarDeck:
         self.shuffle()
         self.reshuffle = False
 
-    def draw(self):
-
+    def deal(self):
         # return value mod 52 % suit(13)
         card = self.cards[self.draw_ind] % 52 % 13
         suit = self.cards[self.draw_ind] % 52 // 13
@@ -63,12 +62,15 @@ class WarDeck:
 
         return card, suit
 
+    def draw(self):
+        return self.deal()
+
     def to_string(self, s, c):
         return _suits[s] + " " + _cards[c]
 
 
 if __name__ == "__main__":
-    deck = WarDeck(n_decks=1,stop_ind=0)
+    deck = WarDeck(n_decks=12, stop_ind=0)
 
     for _ in range(1):
         deck.shuffle()
