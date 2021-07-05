@@ -70,7 +70,7 @@ class WarDeck:
 
 
 if __name__ == "__main__":
-    deck = WarDeck(n_decks=12, stop_ind=0)
+    deck = WarDeck(n_decks=1, stop_ind=0)
 
     for _ in range(1):
         deck.shuffle()

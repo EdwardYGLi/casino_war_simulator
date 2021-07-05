@@ -54,8 +54,10 @@ def main(args):
             else:
                 if tie_wager:
                     money += args.tie_wager_amount * args.tie_wager_ratio
+                # surrender
                 if random.random() > args.war_ratio:
                     money -= args.bet / 2
+                # war
                 else:
                     # burn
                     for _ in range(3):
@@ -78,15 +80,17 @@ def main(args):
                     # tie
                     else:
                         money += 2 * args.bet
-        results.append(money)
+        if money > 0 :
+            results.append(money)
         if money > args.money:
             win += 1
         elif money < args.money:
             lose += 1
-
+    print(len(results))
     plt.figure()
     plt.hist(results)
-
+    plt.xlabel("money ($)")
+    plt.ylabel("occurence (out of {})".format(args.num_sims))
     plt.savefig(os.path.join(_outdir, "{}_distribution.png".format(exp_name)))
 
     with open(os.path.join(_outdir, "{}_stats.txt".format(exp_name)), "w") as f:
@@ -101,11 +105,11 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--decks", help="number of decks", default=12)
     parser.add_argument("--tie_wager_ratio", help="percentage of tie wagers to bet", default=0.0)
     parser.add_argument("--tie_wager_payout", help="tie wager payout", default=10)
-    parser.add_argument("--tie_wager_amount", help="tie wager amount", default=10)
+    parser.add_argument("--tie_wager_amount", help="tie wager amount", default=5)
     parser.add_argument("--war_ratio", help="ratio of war on ties", default=1)
     parser.add_argument("-m", "--money", help="player money at start", default=1000)
     parser.add_argument("-b", "--bet", help="default bet amount", default=25)
-    parser.add_argument("-n", "--num_sims", help="number of simulations", default=10000)
+    parser.add_argument("-n", "--num_sims", help="number of simulations", default=1000)
     args = parser.parse_args()
     os.makedirs(_outdir, exist_ok=True)
     main(args)
