@@ -31,11 +31,13 @@ _cards = {
 
 
 class WarDeck:
-    def __init__(self, n_decks=1):
+    def __init__(self, n_decks=1, stop_ind=0):
         self.n_decks = n_decks
         self.deck_size = 52
         self.cards = list(range(self.deck_size * self.n_decks))
         self.draw_ind = 0
+        self.stop_ind = stop_ind
+        self.reshuffle = False
 
     def seed(self, seed):
         np.random.seed(seed)
@@ -45,18 +47,19 @@ class WarDeck:
         for _ in range(times):
             random.shuffle(self.cards)
 
-    def reinit(self):
+    def reinit(self, stop_ind=0):
         self.draw_ind = 0
+        self.stop_ind = stop_ind
         self.shuffle()
+        self.reshuffle = False
 
     def draw(self):
-        if self.draw_ind >= len(self.cards):
-            return None, None
 
         # return value mod 52 % suit(13)
         card = self.cards[self.draw_ind] % 52 % 13
         suit = self.cards[self.draw_ind] % 52 // 13
         self.draw_ind += 1
+        self.reshuffle = self.draw_ind >= len(self.cards) - self.stop_ind
 
         return card, suit
 
@@ -65,21 +68,19 @@ class WarDeck:
 
 
 if __name__ == "__main__":
-    deck = WarDeck(1)
+    deck = WarDeck(n_decks=1,stop_ind=0)
 
-    for _ in range(2):
+    for _ in range(1):
         deck.shuffle()
         counts = {}
         num_counts = {}
-        while 1:
+        while not deck.reshuffle:
             card, suit = deck.draw()
             counts[suit] = counts.get(suit, 0) + 1
             num_counts[card] = num_counts.get(card, 0) + 1
-            if card is None or suit is None:
-                deck.reinit()
-                break
             print(deck.to_string(suit, card))
 
+        deck.reinit(stop_ind=0)
         print("suits counts")
         for key in _suits.keys():
             print("{}:{}".format(_suits[key], counts[key]))
