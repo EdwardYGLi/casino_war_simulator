@@ -15,8 +15,7 @@ _outdir = "./output"
 
 
 def main(args):
-    exp_name = "d_{}_tr_{}_tp_{}_ta_{}_wr_{}_m_{}_b_{}_n_{}".format(args.decks, args.tie_wager_ratio,
-                                                                    args.tie_wager_payout, args.tie_wager_amount,
+    exp_name = "d_{}_wr_{}_m_{}_b_{}_n_{}".format(args.decks,
                                                                     args.war_ratio, args.money,
                                                                     args.bet, args.num_sims)
     results = []
@@ -38,22 +37,14 @@ def main(args):
             player = deck.draw()
             dealer = deck.draw()
 
-            # determine if we make a tie wager
-            tie_wager = random.random() < args.tie_wager_ratio
             # win
             if player[1] > dealer[1]:
                 money += args.bet
-                if tie_wager:
-                    money -= args.tie_wager_amount
             # lose
             elif player[1] < dealer[1]:
                 money -= args.bet
-                if tie_wager:
-                    money -= args.tie_wager_amount
             # tie
             else:
-                if tie_wager:
-                    money += args.tie_wager_amount * args.tie_wager_ratio
                 # surrender
                 if random.random() > args.war_ratio:
                     money -= args.bet / 2
@@ -103,9 +94,6 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("arg parser for casino war simulator")
     parser.add_argument("-d", "--decks", help="number of decks", default=12)
-    parser.add_argument("--tie_wager_ratio", help="percentage of tie wagers to bet", default=0.0)
-    parser.add_argument("--tie_wager_payout", help="tie wager payout", default=10)
-    parser.add_argument("--tie_wager_amount", help="tie wager amount", default=5)
     parser.add_argument("--war_ratio", help="ratio of war on ties", default=1)
     parser.add_argument("-m", "--money", help="player money at start", default=1000)
     parser.add_argument("-b", "--bet", help="default bet amount", default=25)
