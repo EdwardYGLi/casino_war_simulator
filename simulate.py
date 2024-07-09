@@ -23,6 +23,7 @@ def main(args):
     deck = WarDeck(args.decks, stop_ind=10)
     win = 0
     lose = 0
+    total_money = 0 
     for _ in tqdm(range(args.num_sims)):
         deck.reinit(stop_ind=10)
         # burn at start
@@ -77,6 +78,7 @@ def main(args):
             win += 1
         elif money < args.money:
             lose += 1
+        total_money += money
     print(len(results))
     plt.figure()
     plt.hist(results)
@@ -89,6 +91,7 @@ def main(args):
         f.write("losses: {}, lose %: {}\n".format(lose, lose / args.num_sims))
         ties = args.num_sims - win - lose
         f.write("ties: {}, tie %: {}\n".format(ties, ties / args.num_sims))
+        f.write("expected_value: {}".format(total_money/args.num_sims))
 
 
 if __name__ == "__main__":
