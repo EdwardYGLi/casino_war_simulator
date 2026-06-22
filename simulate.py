@@ -91,39 +91,38 @@ def run_simulation(deck, args, war_n, progress=True):
 
 
 def main(args):
-    exp_name = "d_{}_wn_{}_m_{}_b_{}_n_{}".format(args.decks,
-                                                                    args.war_n, args.money,
-                                                                    args.bet, args.num_sims)
-
     deck = WarDeck(args.decks, stop_ind=10)
-    win, lose, ties, total_money, results = run_simulation(deck, args, args.war_n)
-    print(len(results))
+
+    # run the "1 in n" sweep once, keeping full results so we can also draw the
+    # money distribution for the chosen strategy without re-simulating it
+    war_ns = list(range(1, args.sweep_max + 1))
+    runs = {}
+    for war_n in tqdm(war_ns):
+        runs[war_n] = run_simulation(deck, args, war_n, progress=False)
+    if args.war_n not in runs:
+        runs[args.war_n] = run_simulation(deck, args, args.war_n, progress=False)
+
+    base = "d_{}_m_{}_b_{}_n_{}".format(args.decks, args.money, args.bet, args.num_sims)
+
+    # chart 1: distribution of final money for the chosen war_n
+    win, lose, ties, total_money, results = runs[args.war_n]
+    dist_name = "{}_wn_{}".format(base, args.war_n)
     plt.figure()
     plt.hist(results)
     plt.xlabel("money ($)")
     plt.ylabel("occurence (out of {})".format(args.num_sims))
-    plt.savefig(os.path.join(_outdir, "{}_distribution.png".format(exp_name)))
+    plt.title("final money distribution (war on 1 of every {} ties)".format(args.war_n))
+    plt.savefig(os.path.join(_outdir, "{}_distribution.png".format(dist_name)))
 
-    with open(os.path.join(_outdir, "{}_stats.txt".format(exp_name)), "w") as f:
+    with open(os.path.join(_outdir, "{}_stats.txt".format(dist_name)), "w") as f:
         f.write("wins: {}, win %: {}\n".format(win, win / args.num_sims))
         f.write("losses: {}, lose %: {}\n".format(lose, lose / args.num_sims))
         f.write("ties: {}, tie %: {}\n".format(ties, ties / args.num_sims))
-        f.write("expected_value: {}".format(total_money/args.num_sims))
+        f.write("expected_value: {}".format(total_money / args.num_sims))
 
-
-def sweep(args):
-    """Sweep the "1 in n" war strategy and chart its effect on expected value."""
-    exp_name = "d_{}_m_{}_b_{}_n_{}_sweep_{}".format(args.decks, args.money,
-                                                     args.bet, args.num_sims,
-                                                     args.sweep_max)
-
-    deck = WarDeck(args.decks, stop_ind=10)
-    war_ns = list(range(1, args.sweep_max + 1))
-    expected_values = []
-    for war_n in tqdm(war_ns):
-        _, _, _, total_money, _ = run_simulation(deck, args, war_n, progress=False)
-        expected_values.append(total_money / args.num_sims)
-
+    # chart 2: war frequency (1 in n ties) vs expected value across the sweep
+    expected_values = [runs[n][3] / args.num_sims for n in war_ns]
+    sweep_name = "{}_sweep_{}".format(base, args.sweep_max)
     plt.figure()
     plt.plot(war_ns, expected_values, marker="o")
     plt.axhline(args.money, color="gray", linestyle="--", label="starting money")
@@ -132,12 +131,12 @@ def sweep(args):
     plt.title("war frequency (1 in n ties) vs expected value")
     plt.xticks(war_ns)
     plt.legend()
-    plt.savefig(os.path.join(_outdir, "{}_chart.png".format(exp_name)))
+    plt.savefig(os.path.join(_outdir, "{}_chart.png".format(sweep_name)))
 
-    with open(os.path.join(_outdir, "{}_stats.txt".format(exp_name)), "w") as f:
+    with open(os.path.join(_outdir, "{}_stats.txt".format(sweep_name)), "w") as f:
         f.write("war_n,expected_value\n")
-        for war_n, ev in zip(war_ns, expected_values):
-            f.write("{},{}\n".format(war_n, ev))
+        for n, ev in zip(war_ns, expected_values):
+            f.write("{},{}\n".format(n, ev))
 
 
 if __name__ == "__main__":
@@ -148,13 +147,8 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--money", help="player money at start", type=float, default=1000)
     parser.add_argument("-b", "--bet", help="default bet amount", type=float, default=25)
     parser.add_argument("-n", "--num_sims", help="number of simulations", type=int, default=1000)
-    parser.add_argument("--sweep", help="sweep the 1-in-n war strategy and chart expected value",
-                        action="store_true")
-    parser.add_argument("--sweep_max", help="largest n to sample in a 1-in-n sweep",
+    parser.add_argument("--sweep_max", help="largest n to sample in the 1-in-n sweep chart",
                         type=int, default=10)
     args = parser.parse_args()
     os.makedirs(_outdir, exist_ok=True)
-    if args.sweep:
-        sweep(args)
-    else:
-        main(args)
+    main(args)
