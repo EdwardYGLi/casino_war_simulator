@@ -31,7 +31,7 @@ def main(args):
         money = args.money
         while not deck.reshuffle:
             if money <= 0:
-                results.append(0)
+                money = 0
                 break
 
             # draw cards
@@ -39,10 +39,10 @@ def main(args):
             dealer = deck.draw()
 
             # win
-            if player[1] > dealer[1]:
+            if player[0] > dealer[0]:
                 money += args.bet
             # lose
-            elif player[1] < dealer[1]:
+            elif player[0] < dealer[0]:
                 money -= args.bet
             # tie
             else:
@@ -64,16 +64,15 @@ def main(args):
                     dealer = deck.deal()
 
                     # win
-                    if player[1] > dealer[1]:
+                    if player[0] > dealer[0]:
                         money += args.bet
                     # lose
-                    elif player[1] < dealer[1]:
+                    elif player[0] < dealer[0]:
                         money -= 2 * args.bet
                     # tie
                     else:
                         money += 2 * args.bet
-        if money > 0 :
-            results.append(money)
+        results.append(money)
         if money > args.money:
             win += 1
         elif money < args.money:
@@ -96,11 +95,11 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("arg parser for casino war simulator")
-    parser.add_argument("-d", "--decks", help="number of decks", default=12)
-    parser.add_argument("--war_ratio", help="ratio of war on ties", default=1)
-    parser.add_argument("-m", "--money", help="player money at start", default=1000)
-    parser.add_argument("-b", "--bet", help="default bet amount", default=25)
-    parser.add_argument("-n", "--num_sims", help="number of simulations", default=1000)
+    parser.add_argument("-d", "--decks", help="number of decks", type=int, default=12)
+    parser.add_argument("--war_ratio", help="ratio of war on ties", type=float, default=1)
+    parser.add_argument("-m", "--money", help="player money at start", type=float, default=1000)
+    parser.add_argument("-b", "--bet", help="default bet amount", type=float, default=25)
+    parser.add_argument("-n", "--num_sims", help="number of simulations", type=int, default=1000)
     args = parser.parse_args()
     os.makedirs(_outdir, exist_ok=True)
     main(args)

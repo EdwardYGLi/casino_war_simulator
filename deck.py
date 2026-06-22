@@ -5,29 +5,9 @@ import random
 
 import numpy as np
 
-_suits = {
-    0: "Clubs",
-    1: "Diamonds",
-    2: "Hearts",
-    3: "Spades"
-}
+_suits = ["Clubs", "Diamonds", "Hearts", "Spades"]
 
-_cards = {
-    0: "2",
-    1: "3",
-    2: "4",
-    3: "5",
-    4: "6",
-    5: "7",
-    6: "8",
-    7: "9",
-    8: "10",
-    9: "J",
-    10: "Q",
-    11: "K",
-    12: "A",
-
-}
+_cards = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
 
 
 class WarDeck:
@@ -84,9 +64,9 @@ if __name__ == "__main__":
 
         deck.reinit(stop_ind=0)
         print("suits counts")
-        for key in _suits.keys():
-            print("{}:{}".format(_suits[key], counts[key]))
+        for key in range(len(_suits)):
+            print("{}:{}".format(_suits[key], counts.get(key, 0)))
 
         print("card counts")
-        for k in _cards.keys():
-            print("{}:{}".format(_cards[k], num_counts[k]))
+        for k in range(len(_cards)):
+            print("{}:{}".format(_cards[k], num_counts.get(k, 0)))
